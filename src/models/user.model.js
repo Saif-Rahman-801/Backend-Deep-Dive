@@ -52,7 +52,7 @@ const userSchema = new Schema(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next(); // checking if password is modified or not?
 
-  this.password = bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 }); // pre is a middleware from mongoose to do some operations before specific operations; use normal function because arrow function doesn't have context of this keyword
 
