@@ -8,8 +8,8 @@ import jwt from "jsonwebtoken";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    const accessToken = user.generateAccessToken();// created this generateAccessToken() method in the user.model.js
+    const refreshToken = user.generateRefreshToken();// created this generateRefreshToken() method in the user.model.js
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
