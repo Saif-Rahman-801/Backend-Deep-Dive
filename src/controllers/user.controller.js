@@ -2,7 +2,10 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteFromCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -75,6 +78,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar file is required");
   }
 
+  // add the public id field to delete cloudinary url
   const user = await User.create({
     fullName,
     avatar: avatar.url,
@@ -252,7 +256,7 @@ const changeYourCurrentPassword = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
-    .json(200, req.user, "current user fetched successfully");
+    .json(new ApiResponse(200, req.user, "current user fetched successfully"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -284,6 +288,21 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
     throw new ApiError(400, "cover Image file is missing");
   }
 
+  // Delete the old coverImage here
+  const todltUser = await User.findById(req.user?._id);
+  const coverImageUrl = todltUser?.coverImage;
+  if (!coverImage) {
+    throw new ApiError(400, "No cover image to delete");
+  }
+
+  try {
+    const parts = coverImageUrl.split("/");
+    const publicId = parts.pop().split(".")[0];
+    deleteFromCloudinary(publicId);
+  } catch (error) {
+    throw new ApiError(500, "error occured while deleting cover image");
+  }
+
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
   if (!coverImage.url) {
@@ -309,6 +328,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is missing");
   }
+
+  // Delete the old avatar Image here
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
