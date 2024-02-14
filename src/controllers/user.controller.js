@@ -289,7 +289,7 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
   }
 
   // Delete the old coverImage here
-/*   const todltUser = await User.findById(req.user?._id);
+  /*   const todltUser = await User.findById(req.user?._id);
   const coverImageUrl = todltUser?.coverImage;
   if (!coverImage) {
     throw new ApiError(400, "No cover image to delete");
@@ -322,7 +322,7 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
   // Delete old cover image after successful update
   if (user.coverImage) {
     // Check if old image URL exists
-    // because the updated user isn't saved yet; coverImage refers to the old user cover image 
+    // because the updated user isn't saved yet; coverImage refers to the old user cover image
     try {
       const parts = user.coverImage.split("/");
       const publicId = parts.pop().split(".")[0];
@@ -363,9 +363,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password");
 
-   if (user.avatar) {
+  if (user.avatar) {
     // Check if old image URL exists
-    // because the updated user isn't saved yet; coverImage refers to the old user cover image 
+    // because the updated user isn't saved yet; coverImage refers to the old user cover image
     try {
       const parts = user.avatar.split("/");
       const publicId = parts.pop().split(".")[0];
@@ -382,6 +382,45 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "avatar changed succeefully"));
 });
 
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+  if (!username?.trim()) {
+    throw new ApiError(400, "Username is missing");
+  }
+
+  const channel = await User.aggregate([
+    {
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribedTo",
+      },
+    },
+    {
+      $addFields: {
+        subscribersCount: {
+          $size: "$subscribers",
+        },
+        channelSubscribedToChannel: { $size: "$subscribedTo" },
+      },
+    },
+  ]);
+});
+
 export {
   registerUser,
   loginUser,
@@ -392,4 +431,5 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImg,
+  getUserChannelProfile,
 };
