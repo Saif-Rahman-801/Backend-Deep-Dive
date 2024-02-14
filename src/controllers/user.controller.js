@@ -289,7 +289,7 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
   }
 
   // Delete the old coverImage here
-  const todltUser = await User.findById(req.user?._id);
+/*   const todltUser = await User.findById(req.user?._id);
   const coverImageUrl = todltUser?.coverImage;
   if (!coverImage) {
     throw new ApiError(400, "No cover image to delete");
@@ -301,7 +301,7 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
     deleteFromCloudinary(publicId);
   } catch (error) {
     throw new ApiError(500, "error occured while deleting cover image");
-  }
+  } */
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
@@ -317,7 +317,23 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password"); // it returns the updated value but it doesn't save the updated value immediately; updated value will be only saved after the whole execution of updateUserCoverImg() function.
+
+  // Delete old cover image after successful update
+  if (user.coverImage) {
+    // Check if old image URL exists
+    // because the updated user isn't saved yet; coverImage refers to the old user cover image 
+    try {
+      const parts = user.coverImage.split("/");
+      const publicId = parts.pop().split(".")[0];
+      await deleteFromCloudinary(publicId);
+    } catch (error) {
+      console.error("Error deleting old cover image:", error);
+      throw new ApiError(500, "error occured while deleting cover image");
+      // Handle deletion error (log, notify user, etc.) but don't rollback update
+    }
+  }
+
   res
     .status(200)
     .json(new ApiResponse(200, user, "avatar changed succeefully"));
@@ -346,6 +362,20 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
+
+   if (user.avatar) {
+    // Check if old image URL exists
+    // because the updated user isn't saved yet; coverImage refers to the old user cover image 
+    try {
+      const parts = user.avatar.split("/");
+      const publicId = parts.pop().split(".")[0];
+      await deleteFromCloudinary(publicId);
+    } catch (error) {
+      console.error("Error deleting old cover image:", error);
+      throw new ApiError(500, "error occured while deleting cover image");
+      // Handle deletion error (log, notify user, etc.) but don't rollback update
+    }
+  }
 
   res
     .status(200)
