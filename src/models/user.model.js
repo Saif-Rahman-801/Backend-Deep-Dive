@@ -73,7 +73,9 @@ userSchema.methods.generateAccessToken = function () {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
-};
+}; /*
+In Mongoose, methods is a special property that allows you to add instance methods to your schema. 
+When you define a method using userSchema.methods, it becomes available to instances of the model created from that schema.  */
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
