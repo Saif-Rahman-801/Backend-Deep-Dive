@@ -56,9 +56,22 @@ userSchema.pre("save", async function (next) {
   next();
 }); // pre is a middleware from mongoose to do some operations before specific operations; use normal function because arrow function doesn't have context of this keyword
 
+
+/*
+In Mongoose, methods is a special property that allows you to add instance methods to your schema. 
+When you define a method using userSchema.methods, it becomes available to instances of the model created from that schema. 
+isPasswordCorrect is a custom instance method added to the userSchema. 
+This method takes a password as an argument and compares it with the hashed password stored in the user instance (this.password). 
+It uses bcrypt.compare() to perform the comparison.
+When you create a new user object using const user = new User({ user data }) and save it to the database, 
+each instance of the User model will have access to the isPasswordCorrect method.
+once you retrieve a user from the database using User.findOne() or any other query method, the isPasswordCorrect method will also be available for that user object.
+*/
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 }; // creating a manual method to check if the password is correct
+
+
 
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
@@ -73,9 +86,7 @@ userSchema.methods.generateAccessToken = function () {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
-}; /*
-In Mongoose, methods is a special property that allows you to add instance methods to your schema. 
-When you define a method using userSchema.methods, it becomes available to instances of the model created from that schema.  */
+}; 
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
