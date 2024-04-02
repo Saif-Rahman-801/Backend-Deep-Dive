@@ -13,8 +13,8 @@ const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);// user you retrived
     /* user.generateAccessToken() it adds the generateAccessToken() function(method) to the user object (const user = await User.findById(userId)) you retrived from the db*/
-    const accessToken = user.generateAccessToken(); // created this generateAccessToken() method in the user.model.js 
-    const refreshToken = user.generateRefreshToken(); // created this generateRefreshToken() method in the user.model.js
+    const accessToken = user.generateAccessToken(); // created this generateAccessToken() method is coming from the user.model.js 
+    const refreshToken = user.generateRefreshToken(); // created this generateRefreshToken() method is coming from the user.model.js
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
