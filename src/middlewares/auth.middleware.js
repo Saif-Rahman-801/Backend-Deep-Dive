@@ -22,6 +22,17 @@ in each front-end request there will be a header with the token bearer like avob
     }
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+/*
+    console.log(decodedToken);
+    the decoded token looks like this in the console
+    decodedToken =  {
+    _id: "60f237a3b1935a875d71f", // Example user ID
+    email: "example@example.com", // Example email
+    username: "example_username", // Example username
+    iat: 1649267, // Issued at (timestamp)
+    exp: 1649867 // Expiry (timestamp)
+  }
+*/
 
     const user = await User.findById(decodedToken?._id).select(
       "-password -refreshToken"
