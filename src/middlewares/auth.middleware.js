@@ -5,6 +5,14 @@ import jwt from "jsonwebtoken";
 
 export const verifyJWT = asyncHandler(async (req, _, next) => {
   try {
+    /*
+    axios.get('/api/route', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    },
+});
+in each front-end request there will be a header with the token bearer like avobe
+    */
     const token =
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
